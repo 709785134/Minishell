@@ -1,0 +1,2 @@
+E:\pycharm\Py_projects\myshell\x64\Debug\myshell.exe
+E:\pycharm\Py_projects\Minishell\myshell\x64\Debug\myshell.exe

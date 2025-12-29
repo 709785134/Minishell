@@ -1,0 +1,11 @@
+﻿  env.c
+E:\pycharm\Py_projects\Minishell\myshell\env.c(1,1): warning C4005: “_CRT_SECURE_NO_WARNINGS”: 宏重定义
+E:\pycharm\Py_projects\Minishell\myshell\env.c(1,1): message : 之前在命令行上声明的“_CRT_SECURE_NO_WARNINGS”
+  parser.c
+E:\pycharm\Py_projects\Minishell\myshell\parser.c(1,1): warning C4005: “_CRT_SECURE_NO_WARNINGS”: 宏重定义
+E:\pycharm\Py_projects\Minishell\myshell\parser.c(1,1): message : 之前在命令行上声明的“_CRT_SECURE_NO_WARNINGS”
+E:\pycharm\Py_projects\Minishell\myshell\parser.c(498,27): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+E:\pycharm\Py_projects\Minishell\myshell\parser.c(590,27): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+E:\pycharm\Py_projects\Minishell\myshell\parser.c(636,39): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  正在生成代码...
+  myshell.vcxproj -> E:\pycharm\Py_projects\Minishell\myshell\x64\Debug\myshell.exe
