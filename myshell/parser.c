@@ -24,12 +24,16 @@ static int eval_condition(const char* condition) {
 
     // Tokenize the condition
     char* token1 = strtok(start, " ");
+    if (!token1) return 0;
+    
     char* token2 = strtok(NULL, " ");
+    if (!token2) return 0;
+    
     char* token3 = strtok(NULL, " ");
+    if (!token3) return 0;
 
-    if (!token1 || !token2 || !token3) return 0;
-
-    // Get actual values of variables if they are variable references
+    // Compare based on operator
+    if (strcmp(token2, "=") == 0 || strcmp(token2, "==") == 0) {
     char val1[64], val2[64];
     if (token1[0] == '$') {
         // Process the token to handle variable substitution
@@ -314,18 +318,32 @@ static void handle_if_statement(FILE* fp) {
         char* condition_start = line;
         while (*condition_start == ' ') condition_start++;
 
-        // Find 'then' to extract condition
-        char* then_pos = strstr(condition_start, "then");
+        // Find 'then' to extract condition (could be 'then' or '; then')
+        char* then_pos = strstr(condition_start, "; then");
         if (then_pos) {
             *then_pos = '\0';
             strcpy(condition, condition_start);
         }
         else {
-            strcpy(condition, condition_start);
-            // Read next line for 'then'
-            if (fgets(line, sizeof(line), fp)) {
-                line[strcspn(line, "\r\n")] = 0;
+            then_pos = strstr(condition_start, "then");
+            if (then_pos) {
+                *then_pos = '\0';
+                strcpy(condition, condition_start);
             }
+            else {
+                strcpy(condition, condition_start);
+                // Read next line for 'then'
+                if (fgets(line, sizeof(line), fp)) {
+                    line[strcspn(line, "\r\n")] = 0;
+                }
+            }
+        }
+        
+        // Remove 'if' from the beginning of the condition if present
+        if (strncmp(condition, "if", 2) == 0 && (condition[2] == ' ' || condition[2] == '\t')) {
+            char* temp = condition + 2;
+            while (*temp == ' ' || *temp == '\t') temp++;
+            strcpy(condition, temp);
         }
     }
 
@@ -363,17 +381,22 @@ static void handle_if_statement(FILE* fp) {
         for (int i = 0; i < block_len; i++) {
             execute_conditional_commands(block[i]);
         }
-        // Skip elif/else blocks
-        if (elif_found || else_found) {
-            int nested_level = 1;
-            while (nested_level > 0 && fgets(line, sizeof(line), fp)) {
-                line[strcspn(line, "\r\n")] = 0;
-                if (strcmp(line, "fi") == 0) {
-                    nested_level--;
-                }
-                else if (strncmp(line, "if", 2) == 0 && (line[2] == ' ' || line[2] == '\0')) {
-                    nested_level++;
-                }
+        // Skip to 'fi' - consume the rest of the if-elif-else-fi structure
+        int nested_level = 1;
+        while (nested_level > 0 && fgets(line, sizeof(line), fp)) {
+            line[strcspn(line, "\r\n")] = 0;
+            if (strcmp(line, "fi") == 0) {
+                nested_level--;
+            }
+            else if (strncmp(line, "if", 2) == 0 && (line[2] == ' ' || line[2] == '\0')) {
+                // Handle nested if statements
+                nested_level++;
+                // Need to recursively handle the nested if statement
+                // This is complex, so we'll just continue reading until all nested if's are closed
+            }
+            else if (nested_level == 1 && (strncmp(line, "elif", 4) == 0 || strcmp(line, "else") == 0)) {
+                // These are part of the current if structure, not nested ones
+                // Continue reading until we find fi
             }
         }
     }
@@ -394,6 +417,7 @@ static void handle_if_statement(FILE* fp) {
             }
         }
         else {
+            // Skip to 'fi'
             int nested_level = 1;
             while (nested_level > 0 && fgets(line, sizeof(line), fp)) {
                 line[strcspn(line, "\r\n")] = 0;
@@ -527,12 +551,12 @@ static void handle_case_statement(FILE* fp) {
                 for (int i = 0; i < block_len; i++) {
                     execute_conditional_commands(block[i]);
                 }
-                // Skip to esac
+                // Skip to esac (esac line will be consumed by the loop condition)
                 while (fgets(line, sizeof(line), fp)) {
                     line[strcspn(line, "\r\n")] = 0;
                     if (strcmp(line, "esac") == 0) break;
                 }
-                return;
+                // The function will return naturally after processing all case options
             }
             in_pattern_block = 0;
             block_len = 0;
