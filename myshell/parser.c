@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "parser.h"
 #include "env.h"
 #include "executor.h"
@@ -11,6 +10,8 @@
 
 // Enhanced condition evaluation to handle string comparisons and file tests
 static int eval_condition(const char* condition) {
+    if (!condition) return 0;
+    
     // Parse condition in format like: [ "$var" = "value" ] or [ $var -eq 5 ]
     char temp[MAX_LINE];
     strcpy(temp, condition);
@@ -32,8 +33,6 @@ static int eval_condition(const char* condition) {
     char* token3 = strtok(NULL, " ");
     if (!token3) return 0;
 
-    // Compare based on operator
-    if (strcmp(token2, "=") == 0 || strcmp(token2, "==") == 0) {
     char val1[64], val2[64];
     if (token1[0] == '$') {
         // Process the token to handle variable substitution
@@ -104,6 +103,7 @@ static int eval_condition(const char* condition) {
 
 // Simple arithmetic expression evaluator
 static int evaluate_simple_arithmetic(const char* expr) {
+    if (!expr) return 0;
     char expr_copy[MAX_LINE];
     strcpy(expr_copy, expr);
 
@@ -143,6 +143,7 @@ static int evaluate_simple_arithmetic(const char* expr) {
 
 // Check if a line is an arithmetic assignment
 static int is_arithmetic_assignment(const char* line) {
+    if (!line) return 0;
     // Check for pattern: variable=$((expression))
     char* eq = strchr(line, '=');
     if (!eq) return 0;
@@ -155,6 +156,7 @@ static int is_arithmetic_assignment(const char* line) {
 
 // Process arithmetic assignment
 static void process_arithmetic_assignment(const char* line) {
+    if (!line) return;
     char temp_line[MAX_LINE];
     strcpy(temp_line, line);
 
@@ -194,6 +196,7 @@ static void process_arithmetic_assignment(const char* line) {
 
 // Function to split a command line by semicolons for sequential execution
 static void execute_sequential_commands(char* line) {
+    if (!line) return;
     // Make a copy of the line to work with
     char work_line[MAX_LINE];
     strcpy(work_line, line);
@@ -219,6 +222,7 @@ static void execute_sequential_commands(char* line) {
 
 // Function to execute conditional commands with && and ||
 static void execute_conditional_commands(char* line) {
+    if (!line) return;
     // First check if this is an arithmetic assignment
     if (is_arithmetic_assignment(line)) {
         process_arithmetic_assignment(line);
@@ -300,6 +304,7 @@ static void execute_conditional_commands(char* line) {
 
 // Check if a line is a comment
 static int is_comment(const char* line) {
+    if (!line) return 0;
     const char* p = line;
     while (*p == ' ' || *p == '\t') p++;
     return *p == '#';
@@ -307,6 +312,7 @@ static int is_comment(const char* line) {
 
 // Enhanced function to handle if-elif-else-fi structures
 static void handle_if_statement(FILE* fp) {
+    if (!fp) return;
     char line[MAX_LINE];
     char condition[MAX_LINE];
 
@@ -434,6 +440,7 @@ static void handle_if_statement(FILE* fp) {
 
 // Check if a line is a case pattern (ends with ')')
 static int is_case_pattern(const char* line) {
+    if (!line) return 0;
     char temp[MAX_LINE];
     strcpy(temp, line);
 
@@ -447,6 +454,7 @@ static int is_case_pattern(const char* line) {
 
 // Enhanced function to handle case statements
 static void handle_case_statement(FILE* fp) {
+    if (!fp) return;
     char line[MAX_LINE];
     char case_expr[MAX_LINE] = "";
 
@@ -569,6 +577,7 @@ static void handle_case_statement(FILE* fp) {
 }
 
 void interpret(FILE* fp) {
+    if (!fp) return;
     char line[MAX_LINE];
     char block[MAX_BLOCK][MAX_LINE];
     int block_len;

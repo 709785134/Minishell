@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "env.h"
 #include <string.h>
 #include <stdio.h>
@@ -19,7 +18,7 @@ static int exit_status = 0;
 static int process_id = 1234;
 static int arg_count = 0;
 static char arg_list[256] = "";
-static char** arg_array = NULL;
+
 
 const char* get_var(const char* name) {
     // Handle special variables
